@@ -20,6 +20,7 @@
   },
   "dependencies": {
     "assert": "^1.4.1",
+    "colors": "^1.1.2",
     "esprima": "^4.0.0",
     "expo": "^22.0.2",
     "js-beautify": "^1.7.4",
