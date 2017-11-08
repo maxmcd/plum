@@ -1,13 +1,14 @@
 require('colors')
 const assert = require("assert");
 const recast = require("recast");
+const pd = require("pretty-data").pd;
+
+const jsx = false
 
 const program = "const h = 'hi';()=>{console.log('foo')}";
 
-let formatted_program = `const h = "hi";
-() => {
-    console.log("foo");
-};`;
+let formatted_program = (
+`function thing(){}`);
 // formatted_program = `const hi = "hi";`
 
 const colors = [
@@ -20,6 +21,8 @@ const colors = [
     "white",
     "gray",
 ]
+
+
 
 const ast = recast.parse(formatted_program);
 
@@ -55,8 +58,14 @@ recast.visit(ast, {
 
 let out = []
 for (var i=stack.length-1; i > -1; i--) {
-    
+
     let node = stack[i][0]
+    if (node.type == "File") {
+        continue
+    }
+    if (node.type == "Program") {
+        continue
+    }
     let is_start = stack[i][1]
     let next = stack[i-1]
 
@@ -77,11 +86,21 @@ for (var i=stack.length-1; i > -1; i--) {
         end = next_node.loc.end
     }
     if (is_start) {
-        out.push(`<Text onPress={() => {this.displayType("${node.type}")}}>`)
-        out.push(`{${JSON.stringify(code_for_loc({end: node.loc.start, start: end}))}}`)
+        if (jsx) {
+            out.push(`<Text onPress={() => {this.displayType("${node.type}")}}>`)
+            out.push(`{${JSON.stringify(code_for_loc({end: node.loc.start, start: end}))}}`)
+        } else {
+            out.push(`<${node.type}>`)
+            out.push(code_for_loc({end: node.loc.start, start: end}))
+        }
     } else {
-        out.push(`</Text >`)
-        out.push(`{${JSON.stringify(code_for_loc({end: node.loc.end, start: end}))}}`)
+        if (jsx) {
+            out.push(`</Text >`)
+            out.push(`{${JSON.stringify(code_for_loc({end: node.loc.end, start: end}))}}`)
+        } else {
+            out.push(`</${node.type}>`)
+            out.push(code_for_loc({end: node.loc.end, start: end}))
+        }
     }
 }
 
@@ -90,4 +109,4 @@ out.reverse()
 let out_string = out.join('')
 out_string = out_string
 out_string = out_string
-console.log(out_string)
+console.log(pd.xml(out_string))
