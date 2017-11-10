@@ -27,11 +27,11 @@ class Parser {
     }
     _process_stack() {
         this.out = [];
-        this.tree = { node: null, children: [] };
-        let node = null;
+        this.tree = { node: null, children: [], key: "1", id: 1};
         let nodeStack = [this.tree];
         for (var i = 0; i < this.stack.length; i++) {
             let node = this.stack[i][0];
+
             if (node.type == "File") {
                 continue;
             }
@@ -41,14 +41,16 @@ class Parser {
 
             let is_start = this.stack[i][1];
             if (is_start) {
-                let new_body = { node: node.type, children: [] };
+                let id = nodeStack[nodeStack.length - 1].children.length + 1
+                let new_key = nodeStack[nodeStack.length - 1].key + `-${id}`
+                let new_body = { node: node.type, children: [], key: new_key, id: id};
                 nodeStack[nodeStack.length - 1].children.push(new_body);
                 nodeStack.push(new_body);
             } else {
                 nodeStack.pop();
             }
-            let next = this.stack[i + 1];
 
+            let next = this.stack[i + 1];
             let next_node;
             let next_start;
             if (next) {
@@ -93,11 +95,14 @@ class Parser {
         if (relevant_lines.length == 0) {
             return;
         }
-        let lastIndex = relevant_lines.length - 1;
-        relevant_lines[lastIndex] = relevant_lines[lastIndex].substring(
+        // snip off unneeded ending text
+        let lastLine = relevant_lines.length - 1;
+        relevant_lines[lastLine] = relevant_lines[lastLine].substring(
             0,
             loc.end.column
         );
+
+        // snip off unneeded beginning text
         relevant_lines[0] = relevant_lines[0].substring(
             loc.start.column,
             relevant_lines[0].length

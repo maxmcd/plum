@@ -43,7 +43,7 @@ it("constructs basic tree and xml", () => {
         `<VariableDeclaration>let <VariableDeclarator>` +
         `<Identifier>i</Identifier> = <Literal>"i"` +
         `</Literal></VariableDeclarator>;</VariableDeclaration>`;
-    expect(parser.tree).toEqual(expected_tree);
+    expect(parser.tree).toMatchObject(expected_tree);
     expect(parser.xml()).toEqual(expected_xml);
 });
 
@@ -145,6 +145,6 @@ it("constructs multiline tree and xml", () => {
         `(<Literal>\"thing\"</Literal>)</CallExpression></ExpressionStatement>` +
         `\n}</BlockStatement></ArrowFunctionExpression></VariableDeclarator>` +
         `</VariableDeclaration>`;
-    expect(parser.tree).toEqual(expected_tree);
+    expect(parser.tree).toMatchObject(expected_tree);
     expect(parser.xml()).toEqual(expected_xml);
 });
