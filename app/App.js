@@ -6,9 +6,12 @@ const recast = require("recast");
 export default class App extends React.Component {
   constructor(props) {
     super(props);
+    this.renderBody = this.renderBody.bind(this);
+
     this.state = {
       text: "",
-      ast: null
+      ast: null,
+      tree: {"node":null,"children":[{"node":"VariableDeclaration","children":["let ",{"node":"VariableDeclarator","children":[{"node":"Identifier","children":["thing"]}," = ",{"node":"ArrowFunctionExpression","children":["() => ",{"node":"BlockStatement","children":["{\n    ",{"node":"ExpressionStatement","children":[{"node":"CallExpression","children":[{"node":"MemberExpression","children":[{"node":"Identifier","children":["console"]},".",{"node":"Identifier","children":["log"]}]},"(",{"node":"Literal","children":["\"hi\""]},")"]}]},"\n}"]}]}]}]}]}
     };
     Expo.FileSystem
       .downloadAsync(
@@ -44,100 +47,18 @@ export default class App extends React.Component {
   displayType(type) {
     AlertIOS.alert(type);
   }
+  renderBody(element) {
+    if (typeof element === 'object') {
+      return (<Text onPress={() => {this.displayType(element.node)}}>
+        {element.children.map(this.renderBody)}</Text>)
+    } else {
+      return element
+    }
+  }
   render() {
     return (
       <View style={styles.container}>
-        <Text
-          onPress={() => {
-            this.displayType("File");
-          }}
-        >
-          {""}<Text
-            onPress={() => {
-              this.displayType("Program");
-            }}
-          >
-            {""}<Text
-              onPress={() => {
-                this.displayType("VariableDeclaration");
-              }}
-            >
-              {"const "}<Text
-                onPress={() => {
-                  this.displayType("VariableDeclarator");
-                }}
-              >
-                {""}<Text
-                  onPress={() => {
-                    this.displayType("Identifier");
-                  }}
-                >
-                  {"h"}
-                </Text>{" = "}<Text
-                  onPress={() => {
-                    this.displayType("Literal");
-                  }}
-                >
-                  {'"hi"'}
-                </Text>{""}
-              </Text>{";"}
-            </Text>{"\n"}<Text
-              onPress={() => {
-                this.displayType("ExpressionStatement");
-              }}
-            >
-              {""}<Text
-                onPress={() => {
-                  this.displayType("ArrowFunctionExpression");
-                }}
-              >
-                {"() => "}<Text
-                  onPress={() => {
-                    this.displayType("BlockStatement");
-                  }}
-                >
-                  {"{\n    "}<Text
-                    onPress={() => {
-                      this.displayType("ExpressionStatement");
-                    }}
-                  >
-                    {""}<Text
-                      onPress={() => {
-                        this.displayType("CallExpression");
-                      }}
-                    >
-                      {""}<Text
-                        onPress={() => {
-                          this.displayType("MemberExpression");
-                        }}
-                      >
-                        {""}<Text
-                          onPress={() => {
-                            this.displayType("Identifier");
-                          }}
-                        >
-                          {"console"}
-                        </Text>{"."}<Text
-                          onPress={() => {
-                            this.displayType("Identifier");
-                          }}
-                        >
-                          {"log"}
-                        </Text>{""}
-                      </Text>{"("}<Text
-                        onPress={() => {
-                          this.displayType("Literal");
-                        }}
-                      >
-                        {'"foo"'}
-                      </Text>{")"}
-                    </Text>{";"}
-                  </Text>{"\n}"}
-                </Text>{""}
-              </Text>{";"}
-            </Text>{""}
-          </Text>{""}
-        </Text>
+        {this.state.tree.children.map(this.renderBody)}
       </View>
     );
   }
