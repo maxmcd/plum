@@ -43,7 +43,7 @@ function generateNewStylesheet(stylesheet) {
   return { transformedStyle, defaultColor };
 }
 
-function createChildren({ stylesheet, fontSize, fontFamily }) {
+function createChildren({ stylesheet, fontSize, fontFamily, row }) {
   let childrenCount = 0;
   return (children, defaultColor) => {
     childrenCount += 1;
@@ -54,27 +54,34 @@ function createChildren({ stylesheet, fontSize, fontFamily }) {
         key: `code-segment-${childrenCount}-${i}`,
         defaultColor,
         fontSize,
-        fontFamily
+        fontFamily,
+        row
       })
     );
   };
 }
-
+let cursor = {}
 function createNativeElement({
   node,
   stylesheet,
   key,
   defaultColor,
   fontFamily,
-  fontSize = 12
+  fontSize = 12,
+  row
 }) {
   const { properties, type, tagName: TagName, value } = node;
   const startingStyle = { fontFamily, fontSize, height: fontSize + 2 };
   if (type === "text") {
+    if (!cursor[row]) {
+      cursor[row] = []
+    }
+    cursor[row].push(value)
     return (
       <Text
         key={key}
         style={Object.assign({ color: defaultColor }, startingStyle)}
+        onPress={()=> {console.log(row, node)}}
       >
         {value}
       </Text>
@@ -83,7 +90,8 @@ function createNativeElement({
     const childrenCreator = createChildren({
       stylesheet,
       fontSize,
-      fontFamily
+      fontFamily,
+      row,
     });
     const style = createStyleObject(
       properties.className,
@@ -99,7 +107,7 @@ function createNativeElement({
         key={key}
         style={style}
         onPress={() => {
-          console.log(key);
+          console.log(row, node.children.length);
         }}
       >
         {children}
@@ -109,18 +117,21 @@ function createNativeElement({
 }
 
 function nativeRenderer({ defaultColor, fontFamily, fontSize }) {
-  return ({ rows, stylesheet }) =>
-    rows.map((node, i) => {
-      console.log(i)
-      createNativeElement({
+  return ({ rows, stylesheet }) => {
+    let out = rows.map((node, i) => {
+      return createNativeElement({
         node,
         stylesheet,
         key: `code-segment-${i}`,
         defaultColor,
         fontFamily,
-        fontSize
+        fontSize,
+        row: i,
       })
     });
+    console.log(cursor)
+    return out
+  }
 }
 
 function NativeSyntaxHighlighter({
