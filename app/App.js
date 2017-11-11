@@ -1,21 +1,30 @@
 import React from "react";
 import Expo from "expo";
-import { StyleSheet, Text, View, AlertIOS } from "react-native";
+import { StyleSheet, Text, View, AlertIOS, ScrollView } from "react-native";
+import SyntaxHighlighter from './SyntaxHighlighter';
+import { monokaiSublime } from 'react-syntax-highlighter/dist/styles';
+
 const recast = require("recast");
 
-const Parser = require("./parser");
+function getRandomColor() {
+  var letters = "0123456789ABCDEF";
+  var color = "#";
+  for (var i = 0; i < 6; i++) {
+    color += letters[Math.floor(Math.random() * 16)];
+  }
+  return color;
+}
 
 export default class App extends React.Component {
   constructor(props) {
     super(props);
-    this.renderBody = this.renderBody.bind(this);
 
     this.program = `let foo = () => {
     console.log("thing")\n}`;
-
-    let parser = new Parser(this.program);
+    this.ast = recast.parse(this.program);
     this.state = {
-      parser: parser
+      program: this.program,
+      ast: this.ast
     };
     Expo.FileSystem
       .readDirectoryAsync(Expo.FileSystem.documentDirectory)
@@ -26,8 +35,11 @@ export default class App extends React.Component {
     Expo.FileSystem
       .readAsStringAsync(Expo.FileSystem.documentDirectory + "App.js")
       .then(body => {
-        let parser = new Parser(body);
-        this.setState({ parser: parser });
+        this.ast = recast.parse(body);
+        this.setState({ 
+          ast: this.ast, 
+          program: body
+        });
       })
       .catch(err => {
         console.log(err);
@@ -56,36 +68,21 @@ export default class App extends React.Component {
   displayType(type) {
     AlertIOS.alert(type);
   }
-  renderBody(element) {
-    if (typeof element === "object") {
-      return (
-        <Text
-          key={element.key}
-          onPress={() => {
-            this.displayType(element.node);
-          }}
-        >
-          {element.children.map(this.renderBody)}
-        </Text>
-      );
-    } else {
-      return (<Text>{element}</Text>)
-    }
-  }
+
   render() {
     return (
-      <View style={styles.container}>
-        {this.state.parser.tree.children.map(this.renderBody)}
-      </View>
+      <SyntaxHighlighter 
+        language='javascript' 
+        style={monokaiSublime}
+      >
+        {this.state.program}
+      </SyntaxHighlighter>
     );
   }
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: "#fff",
-    alignItems: "center",
-    justifyContent: "center"
+    backgroundColor: "#333"
   }
 });
