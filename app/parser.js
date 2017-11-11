@@ -18,6 +18,9 @@ class Parser {
         let stack = []
         recast.visit(this.ast, {
             visitNode: function(path) {
+                if (path.node.loc === null) {
+                    path.node.loc = stack[stack.length-1][0].loc
+                }
                 stack.push([path.node, true]);
                 this.traverse(path);
                 stack.push([path.node, false]);
@@ -60,7 +63,6 @@ class Parser {
                 next_node = { loc: { start: { column: 0 } } };
                 next_start = true;
             }
-
             let end;
             if (next_start) {
                 end = next_node.loc.start;
@@ -93,7 +95,7 @@ class Parser {
     _code_for_loc(loc) {
         let relevant_lines = this.lines.slice(loc.start.line - 1, loc.end.line);
         if (relevant_lines.length == 0) {
-            return;
+            return "";
         }
         // snip off unneeded ending text
         let lastLine = relevant_lines.length - 1;

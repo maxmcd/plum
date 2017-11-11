@@ -1,15 +1,35 @@
 "use strict";
 const Parser = require("./parser");
+const fs = require('fs')
 
 let variable_declaration = `let i = "i";`;
 let fat_arrow_declaration = `let foo = () => {
     console.log("thing")
 }`;
 
+let class_declaration = `export default class App extends React.Component {
+constructor(){}}`
+
 it("constructs class correctly", () => {
     let parser = new Parser(variable_declaration);
     expect(parser.code).toEqual(variable_declaration);
 });
+
+it("constructs class correctly", () => {
+    let parser = new Parser(variable_declaration);
+    expect(parser.code).toEqual(variable_declaration);
+});
+
+it ("can handle a complex file", (done) => {
+    fs.readFile('./App.js', 'utf8', function (err, data) {
+        if (err) {
+            return console.log(err)
+        } else {
+            let parser = new Parser(data)
+        }
+        done()
+    })
+})
 
 it("constructs basic tree and xml", () => {
     let parser = new Parser(variable_declaration);

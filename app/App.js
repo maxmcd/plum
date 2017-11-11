@@ -3,7 +3,7 @@ import Expo from "expo";
 import { StyleSheet, Text, View, AlertIOS } from "react-native";
 const recast = require("recast");
 
-const Parser = require("./parser")
+const Parser = require("./parser");
 
 export default class App extends React.Component {
   constructor(props) {
@@ -11,16 +11,29 @@ export default class App extends React.Component {
     this.renderBody = this.renderBody.bind(this);
 
     this.program = `let foo = () => {
-    console.log("thing")
-}`
-    
-    let parser = new Parser(this.program)
+    console.log("thing")\n}`;
+
+    let parser = new Parser(this.program);
     this.state = {
-      text: "",
-      ast: null,
-      tree: parser.tree,
+      parser: parser
     };
-    
+    Expo.FileSystem
+      .readDirectoryAsync(Expo.FileSystem.documentDirectory)
+      .then(files => {
+        console.log(files);
+      });
+
+    Expo.FileSystem
+      .readAsStringAsync(Expo.FileSystem.documentDirectory + "App.js")
+      .then(body => {
+        let parser = new Parser(body);
+        this.setState({ parser: parser });
+      })
+      .catch(err => {
+        console.log(err);
+      });
+  }
+  _downloadApp() {
     Expo.FileSystem
       .downloadAsync(
         "http://localhost:7654/App.js",
@@ -29,18 +42,6 @@ export default class App extends React.Component {
       .then(({ uri }) => {
         console.log(uri);
         return uri;
-      })
-      .then(Expo.FileSystem.readAsStringAsync)
-      .then(body => {
-        const ast = recast.parse(body);
-        const output = recast.prettyPrint(ast).code;
-        this.setState({
-          text: output.split("\n"),
-          ast: ast
-        });
-      })
-      .catch(err => {
-        console.log(err);
       });
   }
   renderText(err, data) {
@@ -56,23 +57,25 @@ export default class App extends React.Component {
     AlertIOS.alert(type);
   }
   renderBody(element) {
-    if (typeof element === 'object') {
+    if (typeof element === "object") {
       return (
-        <Text 
+        <Text
           key={element.key}
-          onPress={() => {this.displayType(element.node)}}
+          onPress={() => {
+            this.displayType(element.node);
+          }}
         >
           {element.children.map(this.renderBody)}
         </Text>
-      )
+      );
     } else {
-      return element
+      return (<Text>{element}</Text>)
     }
   }
   render() {
     return (
       <View style={styles.container}>
-        {this.state.tree.children.map(this.renderBody)}
+        {this.state.parser.tree.children.map(this.renderBody)}
       </View>
     );
   }
