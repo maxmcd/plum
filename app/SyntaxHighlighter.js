@@ -1,10 +1,8 @@
 import React from "react";
 import { Text, ScrollView, Platform } from "react-native";
-import SyntaxHighlighter from "react-syntax-highlighter";
-import {
-  createStyleObject
-} from "react-syntax-highlighter/src/create-element";
-import { defaultStyle } from "react-syntax-highlighter/src/styles";
+import SyntaxHighlighter from "react-syntax-highlighter-prismjs";
+import { createStyleObject } from "react-syntax-highlighter-prismjs/dist/create-element";
+import { defaultStyle } from "react-syntax-highlighter-prismjs/dist/styles";
 
 const styleCache = new Map();
 
@@ -43,7 +41,7 @@ function generateNewStylesheet(stylesheet) {
   return { transformedStyle, defaultColor };
 }
 
-function createChildren({ stylesheet, fontSize, fontFamily, row }) {
+function createChildren({ stylesheet, fontSize, fontFamily, row, onClickToken }) {
   let childrenCount = 0;
   return (children, defaultColor) => {
     childrenCount += 1;
@@ -55,12 +53,13 @@ function createChildren({ stylesheet, fontSize, fontFamily, row }) {
         defaultColor,
         fontSize,
         fontFamily,
-        row
+        row,
+        onClickToken
       })
     );
   };
 }
-let cursor = {}
+let cursor = {};
 function createNativeElement({
   node,
   stylesheet,
@@ -68,21 +67,29 @@ function createNativeElement({
   defaultColor,
   fontFamily,
   fontSize = 12,
-  row
+  row,
+  onClickToken
 }) {
   const { properties, type, tagName: TagName, value } = node;
   const startingStyle = { fontFamily, fontSize, height: fontSize + 2 };
   if (type === "text") {
     if (!cursor[row]) {
-      cursor[row] = 0
+      cursor[row] = 0;
     }
-    let start = cursor[row]
-    cursor[row] += value.length
+    let start = cursor[row];
+    let end = start + value.length;
+    cursor[row] += value.length;
     return (
       <Text
         key={key}
         style={Object.assign({ color: defaultColor }, startingStyle)}
-        onPress={()=> {console.log(row, node, start)}}
+        onPress={() => {
+          let loc = {
+            start: { line: row, column: start },
+            end: { line: row, column: end }
+          }
+          onClickToken({node, loc})
+        }}
       >
         {value}
       </Text>
@@ -93,6 +100,7 @@ function createNativeElement({
       fontSize,
       fontFamily,
       row,
+      onClickToken
     });
     const style = createStyleObject(
       properties.className,
@@ -117,7 +125,7 @@ function createNativeElement({
   }
 }
 
-function nativeRenderer({ defaultColor, fontFamily, fontSize }) {
+function nativeRenderer({ defaultColor, fontFamily, fontSize, onClickToken }) {
   return ({ rows, stylesheet }) => {
     let out = rows.map((node, i) => {
       return createNativeElement({
@@ -127,11 +135,12 @@ function nativeRenderer({ defaultColor, fontFamily, fontSize }) {
         defaultColor,
         fontFamily,
         fontSize,
-        row: i,
-      })
+        row: i+1,
+        onClickToken: onClickToken,
+      });
     });
-    return out
-  }
+    return out;
+  };
 }
 
 function NativeSyntaxHighlighter({
@@ -139,6 +148,7 @@ function NativeSyntaxHighlighter({
   fontSize,
   style,
   children,
+  onClickToken,
   ...rest
 }) {
   const { transformedStyle, defaultColor } = generateNewStylesheet(style);
@@ -150,7 +160,8 @@ function NativeSyntaxHighlighter({
       renderer={nativeRenderer({
         defaultColor,
         fontFamily,
-        fontSize
+        fontSize,
+        onClickToken
       })}
     >
       {children}

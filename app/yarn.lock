@@ -4490,6 +4490,10 @@ pretty-format@^4.2.1:
   version "4.3.1"
   resolved "https://registry.yarnpkg.com/pretty-format/-/pretty-format-4.3.1.tgz#530be5c42b3c05b36414a7a2a4337aa80acd0e8d"
 
+"prism-themes@https://github.com/PrismJS/prism-themes.git#afb4116547cd854074ad705b8171768403ca11f3":
+  version "1.0.0"
+  resolved "https://github.com/PrismJS/prism-themes.git#afb4116547cd854074ad705b8171768403ca11f3"
+
 prismjs@^1.8.4, prismjs@~1.8.0:
   version "1.8.4"
   resolved "https://registry.yarnpkg.com/prismjs/-/prismjs-1.8.4.tgz#573cc7a14c2c06566e1eca20d813f5ae55db80d2"
@@ -4800,11 +4804,12 @@ react-redux@^5.0.2:
     loose-envify "^1.1.0"
     prop-types "^15.5.10"
 
-"react-syntax-highlighter@https://github.com/maxmcd/react-syntax-highlighter.git":
-  version "5.8.2"
-  resolved "https://github.com/maxmcd/react-syntax-highlighter.git#bbb21d8aee9bc3c93f67149ed66b0d13981b5506"
+react-syntax-highlighter-prismjs@^5.9.0:
+  version "5.9.0"
+  resolved "https://registry.yarnpkg.com/react-syntax-highlighter-prismjs/-/react-syntax-highlighter-prismjs-5.9.0.tgz#6890598928e17f08af5c94ff7f4c02a20eb0dc6d"
   dependencies:
     babel-runtime "^6.18.0"
+    prism-themes "https://github.com/PrismJS/prism-themes.git#afb4116547cd854074ad705b8171768403ca11f3"
     prismjs "^1.8.4"
     refractor "^2.0.0"
 

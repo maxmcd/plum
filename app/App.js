@@ -2,7 +2,8 @@ import React from "react";
 import Expo from "expo";
 import { StyleSheet, Text, View, AlertIOS, ScrollView } from "react-native";
 import SyntaxHighlighter from './SyntaxHighlighter';
-import { tomorrow } from 'react-syntax-highlighter/src/styles';
+import { darcula } from 'react-syntax-highlighter-prismjs/dist/styles';
+import util from './util';
 
 const recast = require("recast");
 
@@ -18,6 +19,9 @@ function getRandomColor() {
 export default class App extends React.Component {
   constructor(props) {
     super(props);
+
+    this._getNodeForLoc = this._getNodeForLoc.bind(this)
+    this.onClickToken = this.onClickToken.bind(this)
 
     this.program = `let foo = () => {
     console.log("thing")\n}`;
@@ -68,12 +72,38 @@ export default class App extends React.Component {
   displayType(type) {
     AlertIOS.alert(type);
   }
-
+  _getNodeForLoc(loc) {
+    let lastMatch;
+    let start = Date.now()
+    recast.visit(this.ast, {
+      visitNode: function(path) {
+        if (!path.node.loc) {
+          this.traverse(path)
+        } else if (util.isWithinLoc(path.node.loc, loc)) {
+          lastMatch = path.node
+          this.traverse(path)
+        } else {
+          return false
+        }
+      }
+    })
+    let end = Date.now()
+    let ms = end - start
+    if (ms > 5) {
+      console.debug(`AST node search took ${ms} ms. Longer than expected.`)  
+    }
+    console.log(lastMatch.type)
+  }
+  onClickToken({loc, node}) {
+    this._getNodeForLoc(loc)
+  }
   render() {
     return (
       <SyntaxHighlighter 
         language='javascript' 
-        style={tomorrow}
+        style={darcula}
+        onClickToken={this.onClickToken}
+
       >
         {this.state.program}
       </SyntaxHighlighter>
