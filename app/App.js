@@ -2,7 +2,7 @@ import React from "react";
 import Expo from "expo";
 import { StyleSheet, Text, View, AlertIOS, ScrollView } from "react-native";
 import SyntaxHighlighter from './SyntaxHighlighter';
-import { monokaiSublime } from 'react-syntax-highlighter/dist/styles';
+import { tomorrow } from 'react-syntax-highlighter/src/styles';
 
 const recast = require("recast");
 
@@ -73,7 +73,7 @@ export default class App extends React.Component {
     return (
       <SyntaxHighlighter 
         language='javascript' 
-        style={monokaiSublime}
+        style={tomorrow}
       >
         {this.state.program}
       </SyntaxHighlighter>

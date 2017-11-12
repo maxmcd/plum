@@ -18,14 +18,18 @@ class Parser {
         let stack = []
         recast.visit(this.ast, {
             visitNode: function(path) {
-                if (path.node.loc === null) {
-                    path.node.loc = stack[stack.length-1][0].loc
-                }
+                // if (path.node.loc === null) {
+                //     path.node.loc = stack[stack.length-1][0].loc
+                //     console.log(path.node.type + " and " + stack[stack.length-1][0].type)
+                // }
                 stack.push([path.node, true]);
                 this.traverse(path);
                 stack.push([path.node, false]);
             }
         });
+        for (var i=0; i<stack.length; i++) {
+            console.log(stack[i][0].type)
+        }
         this.stack = stack;
     }
     _process_stack() {

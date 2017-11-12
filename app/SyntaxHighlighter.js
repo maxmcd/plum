@@ -3,8 +3,8 @@ import { Text, ScrollView, Platform } from "react-native";
 import SyntaxHighlighter from "react-syntax-highlighter";
 import {
   createStyleObject
-} from "react-syntax-highlighter/dist/create-element";
-import { defaultStyle } from "react-syntax-highlighter/dist/styles";
+} from "react-syntax-highlighter/src/create-element";
+import { defaultStyle } from "react-syntax-highlighter/src/styles";
 
 const styleCache = new Map();
 
@@ -74,14 +74,15 @@ function createNativeElement({
   const startingStyle = { fontFamily, fontSize, height: fontSize + 2 };
   if (type === "text") {
     if (!cursor[row]) {
-      cursor[row] = []
+      cursor[row] = 0
     }
-    cursor[row].push(value)
+    let start = cursor[row]
+    cursor[row] += value.length
     return (
       <Text
         key={key}
         style={Object.assign({ color: defaultColor }, startingStyle)}
-        onPress={()=> {console.log(row, node)}}
+        onPress={()=> {console.log(row, node, start)}}
       >
         {value}
       </Text>
@@ -129,7 +130,6 @@ function nativeRenderer({ defaultColor, fontFamily, fontSize }) {
         row: i,
       })
     });
-    console.log(cursor)
     return out
   }
 }
