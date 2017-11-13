@@ -3,6 +3,7 @@ import { Text, ScrollView, Platform } from "react-native";
 import SyntaxHighlighter from "react-syntax-highlighter-prismjs";
 import { createStyleObject } from "react-syntax-highlighter-prismjs/dist/create-element";
 import { defaultStyle } from "react-syntax-highlighter-prismjs/dist/styles";
+import util from "./util"
 
 const styleCache = new Map();
 
@@ -73,27 +74,31 @@ function createNativeElement({
   const { properties, type, tagName: TagName, value } = node;
   const startingStyle = { fontFamily, fontSize, height: fontSize + 2 };
   if (type === "text") {
-    if (!cursor[row]) {
-      cursor[row] = 0;
-    }
-    let start = cursor[row];
-    let end = start + value.length;
-    cursor[row] += value.length;
-    return (
-      <Text
-        key={key}
-        style={Object.assign({ color: defaultColor }, startingStyle)}
-        onPress={() => {
-          let loc = {
-            start: { line: row, column: start },
-            end: { line: row, column: end }
-          }
-          onClickToken({node, loc})
-        }}
-      >
-        {value}
-      </Text>
-    );
+    let parts = util.trimAndReturnParts(value)
+    return parts.map((part, i) => {
+      if (!cursor[row]) {
+        cursor[row] = 0;
+      }
+      let start = cursor[row];
+      let end = start + part.length;
+      cursor[row] += part.length;
+
+      return (
+        <Text
+          key={key + "-" + i}
+          style={Object.assign({ color: defaultColor }, startingStyle)}
+          onPress={() => {
+            let loc = {
+              start: { line: row, column: start },
+              end: { line: row, column: end }
+            }
+            onClickToken({node, loc})
+          }}
+        >
+          {part}
+        </Text>
+      );      
+    })
   } else if (TagName) {
     const childrenCreator = createChildren({
       stylesheet,

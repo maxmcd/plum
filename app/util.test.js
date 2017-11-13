@@ -31,3 +31,15 @@ it("isWithinLoc detects children correctly", () => {
    )).toEqual(true) 
 });
 
+it("trimAndReturnParts should return correct parts", () => {
+    let string = "    " + "word" + "  "
+    let parts = util.trimAndReturnParts(string)
+    expect(parts[1]).toEqual("word")
+    expect(parts[0]).toEqual("    ")
+    expect(parts[2]).toEqual("  ")
+
+
+    let whitespaceString = "       "
+    parts = util.trimAndReturnParts(whitespaceString)
+    expect(parts).toEqual([whitespaceString])
+})

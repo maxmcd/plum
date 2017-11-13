@@ -13,19 +13,41 @@ module.exports = {
             return true;
         }
         if (
-            loc.start.line == item.start.line && 
-            loc.start.column > item.start.column) {
+            loc.start.line == item.start.line &&
+            loc.start.column > item.start.column
+        ) {
             // loc and item start on the same column but loc's start column
             // is after item's start column
-            return false
+            return false;
         }
-        if (
-            loc.end.line == item.end.line && 
-            loc.end.column < item.end.column) {
+        if (loc.end.line == item.end.line && loc.end.column < item.end.column) {
             // loc and item end on the same column but loc's end column
             // is before item's end column
-            return false
+            return false;
         }
-        return true
+        return true;
+    },
+    trimAndReturnParts(string) {
+        // https://jsperf.com/trim-performance-test
+        let stringTrimLeft = /^[\s\u00A0]+/;
+        let stringTrimRight = /[\s\u00A0]+$/;
+        let leftTrimmed = string.replace(stringTrimLeft, "");
+        let leftLength = string.length - leftTrimmed.length;
+        let trimmed = leftTrimmed.replace(stringTrimRight, "");
+        if (trimmed.length === 0) {
+            return [string]
+        }
+        let rightLength = string.length - (leftLength + trimmed.length);
+        let left = string.substring(0, leftLength)
+        let right = string.substring(leftLength + trimmed.length, string.length)
+        let out = []
+        if (left.length !== 0) {
+            out.push(left)
+        }
+        out.push(trimmed)
+        if (right.length !== 0) {
+            out.push(right)
+        }
+        return out
     }
 };
