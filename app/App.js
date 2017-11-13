@@ -1,34 +1,37 @@
 import React from "react";
 import Expo from "expo";
-import { StyleSheet, Text, View, AlertIOS, ScrollView } from "react-native";
-import SyntaxHighlighter from './SyntaxHighlighter';
-import { darcula } from 'react-syntax-highlighter-prismjs/dist/styles';
-import util from './util';
+import {
+  StyleSheet,
+  Text,
+  View,
+  AlertIOS,
+  ScrollView,
+  Modal,
+  TouchableOpacity,
+  TouchableHighlight,
+  TouchableWithoutFeedback
+} from "react-native";
+import SyntaxHighlighter from "./SyntaxHighlighter";
+import { darcula } from "react-syntax-highlighter-prismjs/dist/styles";
+import util from "./util";
 
 const recast = require("recast");
-
-function getRandomColor() {
-  var letters = "0123456789ABCDEF";
-  var color = "#";
-  for (var i = 0; i < 6; i++) {
-    color += letters[Math.floor(Math.random() * 16)];
-  }
-  return color;
-}
 
 export default class App extends React.Component {
   constructor(props) {
     super(props);
 
-    this._getNodeForLoc = this._getNodeForLoc.bind(this)
-    this.onClickToken = this.onClickToken.bind(this)
+    this._getNodeForLoc = this._getNodeForLoc.bind(this);
+    this.onClickToken = this.onClickToken.bind(this);
 
     this.program = `let foo = () => {
     console.log("thing")\n}`;
     this.ast = recast.parse(this.program);
     this.state = {
       program: this.program,
-      ast: this.ast
+      ast: this.ast,
+      modalVisible: false,
+      selectedNode: {},
     };
     Expo.FileSystem
       .readDirectoryAsync(Expo.FileSystem.documentDirectory)
@@ -40,8 +43,8 @@ export default class App extends React.Component {
       .readAsStringAsync(Expo.FileSystem.documentDirectory + "App.js")
       .then(body => {
         this.ast = recast.parse(body);
-        this.setState({ 
-          ast: this.ast, 
+        this.setState({
+          ast: this.ast,
           program: body
         });
       })
@@ -74,39 +77,74 @@ export default class App extends React.Component {
   }
   _getNodeForLoc(loc) {
     let lastMatch;
-    let start = Date.now()
+    let start = Date.now();
     recast.visit(this.ast, {
       visitNode: function(path) {
         if (!path.node.loc) {
-          this.traverse(path)
+          this.traverse(path);
         } else if (util.isWithinLoc(path.node.loc, loc)) {
-          lastMatch = path.node
-          this.traverse(path)
+          lastMatch = path.node;
+          this.traverse(path);
         } else {
-          return false
+          return false;
         }
       }
-    })
-    let end = Date.now()
-    let ms = end - start
+    });
+    let end = Date.now();
+    let ms = end - start;
     if (ms > 5) {
-      console.debug(`AST node search took ${ms} ms. Longer than expected.`)  
+      console.debug(`AST node search took ${ms} ms. Longer than expected.`);
     }
-    console.log(lastMatch.type)
+    console.log(loc)
+    console.log(lastMatch.type);
+    console.log(lastMatch.loc.start);
+    console.log(lastMatch.loc.end);
+    this.setState({
+      modalVisible: true,
+      selectedNode: lastMatch,
+    })
   }
-  onClickToken({loc, node}) {
-    this._getNodeForLoc(loc)
+  onClickToken({ loc, node }) {
+    this._getNodeForLoc(loc);
   }
   render() {
     return (
-      <SyntaxHighlighter 
-        language='javascript' 
-        style={darcula}
-        onClickToken={this.onClickToken}
-
-      >
-        {this.state.program}
-      </SyntaxHighlighter>
+      <View style={{
+        backgroundColor: darcula.hljs.backgroundColor,
+        height: "100%"
+      }}>
+        <Modal
+          animationType="none"
+          transparent={true}
+          visible={this.state.modalVisible}
+          onRequestClose={() => {}}
+        >
+          <TouchableOpacity 
+             style={{height: "100%"}} 
+             activeOpacity={0} 
+             onPressOut={() => {this.setState({modalVisible: false})}}
+           >
+            <TouchableWithoutFeedback>
+              <View style={{marginTop: 200, backgroundColor: "#ccc", height: 60}}>
+                <TouchableHighlight onPress={() => {
+                  this.setState({modalVisible: false})
+                }}>
+                  <Text>Hide Modal</Text>
+                </TouchableHighlight>
+                <Text>{this.state.selectedNode.type}</Text>
+              </View>
+            </TouchableWithoutFeedback>
+          </TouchableOpacity>
+        </Modal>
+        <View style={{height: 20}}></View>
+        <SyntaxHighlighter
+          language="javascript"
+          style={darcula}
+          onClickToken={this.onClickToken}
+        >
+          {this.state.program}
+        </SyntaxHighlighter>
+      </View>
     );
   }
 }

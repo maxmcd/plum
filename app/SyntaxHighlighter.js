@@ -139,6 +139,7 @@ function nativeRenderer({ defaultColor, fontFamily, fontSize, onClickToken }) {
         onClickToken: onClickToken,
       });
     });
+    cursor = {}
     return out;
   };
 }
