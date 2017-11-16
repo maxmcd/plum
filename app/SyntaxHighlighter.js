@@ -1,9 +1,11 @@
 import React from "react";
 import { Text, ScrollView, Platform } from "react-native";
 import SyntaxHighlighter from "react-syntax-highlighter-prismjs";
-import { createStyleObject } from "react-syntax-highlighter-prismjs/dist/create-element";
+import {
+  createStyleObject
+} from "react-syntax-highlighter-prismjs/dist/create-element";
 import { defaultStyle } from "react-syntax-highlighter-prismjs/dist/styles";
-import util from "./util"
+import util from "./util";
 
 const styleCache = new Map();
 
@@ -42,7 +44,14 @@ function generateNewStylesheet(stylesheet) {
   return { transformedStyle, defaultColor };
 }
 
-function createChildren({ stylesheet, fontSize, fontFamily, row, onClickToken }) {
+function createChildren({
+  stylesheet,
+  fontSize,
+  fontFamily,
+  row,
+  onClickToken,
+  selectedNode
+}) {
   let childrenCount = 0;
   return (children, defaultColor) => {
     childrenCount += 1;
@@ -55,7 +64,8 @@ function createChildren({ stylesheet, fontSize, fontFamily, row, onClickToken })
         fontSize,
         fontFamily,
         row,
-        onClickToken
+        onClickToken,
+        selectedNode
       })
     );
   };
@@ -69,12 +79,13 @@ function createNativeElement({
   fontFamily,
   fontSize = 12,
   row,
-  onClickToken
+  onClickToken,
+  selectedNode
 }) {
   const { properties, type, tagName: TagName, value } = node;
   const startingStyle = { fontFamily, fontSize, height: fontSize + 2 };
   if (type === "text") {
-    let parts = util.trimAndReturnParts(value)
+    let parts = util.trimAndReturnParts(value);
     return parts.map((part, i) => {
       if (!cursor[row]) {
         cursor[row] = 0;
@@ -83,29 +94,40 @@ function createNativeElement({
       let end = start + part.length;
       cursor[row] += part.length;
 
+      let backgroundColor;
+
+      let loc = {
+        start: { line: row, column: start },
+        end: { line: row, column: end }
+      };
+
+      if (selectedNode && util.isWithinLoc(selectedNode.node.loc, loc)) {
+        backgroundColor = "#ffffff50";
+      }
+
       return (
         <Text
           key={key + "-" + i}
-          style={Object.assign({ color: defaultColor }, startingStyle)}
+          style={Object.assign(
+            { color: defaultColor, backgroundColor: backgroundColor },
+            startingStyle
+          )}
           onPress={() => {
-            let loc = {
-              start: { line: row, column: start },
-              end: { line: row, column: end }
-            }
-            onClickToken({node, loc})
+            onClickToken({ node, loc });
           }}
         >
           {part}
         </Text>
-      );      
-    })
+      );
+    });
   } else if (TagName) {
     const childrenCreator = createChildren({
       stylesheet,
       fontSize,
       fontFamily,
       row,
-      onClickToken
+      onClickToken,
+      selectedNode
     });
     const style = createStyleObject(
       properties.className,
@@ -130,22 +152,35 @@ function createNativeElement({
   }
 }
 
-function nativeRenderer({ defaultColor, fontFamily, fontSize, onClickToken }) {
+function nativeRenderer({
+  defaultColor,
+  fontFamily,
+  fontSize,
+  onClickToken,
+  selectedNode
+}) {
   return ({ rows, stylesheet }) => {
-    let out = rows.map((node, i) => {
-      return createNativeElement({
-        node,
-        stylesheet,
-        key: `code-segment-${i}`,
-        defaultColor,
-        fontFamily,
-        fontSize,
-        row: i+1,
-        onClickToken: onClickToken,
-      });
-    });
-    cursor = {}
-    return out;
+    return util.timeIt(
+      () => {
+        let out = rows.map((node, i) => {
+          return createNativeElement({
+            node,
+            stylesheet,
+            key: `code-segment-${i}`,
+            defaultColor,
+            fontFamily,
+            fontSize,
+            row: i + 1,
+            onClickToken: onClickToken,
+            selectedNode
+          });
+        });
+        cursor = {};
+        return out;
+      },
+      "Syntax Highlighting",
+      20
+    );
   };
 }
 
@@ -155,6 +190,7 @@ function NativeSyntaxHighlighter({
   style,
   children,
   onClickToken,
+  selectedNode,
   ...rest
 }) {
   const { transformedStyle, defaultColor } = generateNewStylesheet(style);
@@ -167,7 +203,8 @@ function NativeSyntaxHighlighter({
         defaultColor,
         fontFamily,
         fontSize,
-        onClickToken
+        onClickToken,
+        selectedNode
       })}
     >
       {children}
@@ -177,7 +214,7 @@ function NativeSyntaxHighlighter({
 
 NativeSyntaxHighlighter.defaultProps = {
   fontFamily: Platform.OS === "ios" ? "Menlo-Regular" : "monospace",
-  fontSize: 12,
+  fontSize: 16,
   style: defaultStyle,
   PreTag: ScrollView,
   CodeTag: ScrollView

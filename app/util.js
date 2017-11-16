@@ -1,4 +1,43 @@
+import recast from "recast";
+
+function timeIt(call, name, threshold) {
+    let start = Date.now();
+    let out = call();
+    let end = Date.now();
+    let ms = end - start;
+    if (ms > threshold) {
+        console.debug(`${name} took ${ms} ms. Longer than expected.`);
+    }
+    return out;
+}
+
 module.exports = {
+    timeIt: timeIt,
+    keys(obj) {
+        let out = [];
+        for (var key in obj) {
+            out.push(key);
+        }
+        console.log(out);
+    },
+    parse(program) {
+        return timeIt(
+            () => {
+                return recast.parse(program);
+            },
+            "AST Parse",
+            10
+        );
+    },
+    printAst(ast) {
+        return timeIt(
+            () => {
+                return recast.print(ast).code;
+            },
+            "AST Print",
+            10
+        );
+    },
     isWithinLoc(loc, item) {
         if (loc.start.line > item.start.line) {
             // loc starts after item
@@ -35,19 +74,22 @@ module.exports = {
         let leftLength = string.length - leftTrimmed.length;
         let trimmed = leftTrimmed.replace(stringTrimRight, "");
         if (trimmed.length === 0) {
-            return [string]
+            return [string];
         }
         let rightLength = string.length - (leftLength + trimmed.length);
-        let left = string.substring(0, leftLength)
-        let right = string.substring(leftLength + trimmed.length, string.length)
-        let out = []
+        let left = string.substring(0, leftLength);
+        let right = string.substring(
+            leftLength + trimmed.length,
+            string.length
+        );
+        let out = [];
         if (left.length !== 0) {
-            out.push(left)
+            out.push(left);
         }
-        out.push(trimmed)
+        out.push(trimmed);
         if (right.length !== 0) {
-            out.push(right)
+            out.push(right);
         }
-        return out
+        return out;
     }
 };
