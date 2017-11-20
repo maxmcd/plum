@@ -1,4 +1,4 @@
-import recast from "recast";
+const recast = require("recast");
 
 function timeIt(call, name, threshold) {
     let start = Date.now();

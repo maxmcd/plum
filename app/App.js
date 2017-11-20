@@ -9,7 +9,7 @@ import {
   Modal,
   TouchableOpacity,
   TouchableHighlight,
-  TouchableWithoutFeedback
+  TouchableWithoutFeedback,
 } from "react-native";
 import SyntaxHighlighter from "./SyntaxHighlighter";
 import { darcula } from "react-syntax-highlighter-prismjs/dist/styles";
@@ -23,7 +23,7 @@ export default class App extends React.Component {
 
     this._getNodeForLoc = this._getNodeForLoc.bind(this);
     this._renderNodeChildrenButtons = this._renderNodeChildrenButtons.bind(
-      this
+      this,
     );
     this._renderModalBody = this._renderModalBody.bind(this);
     this.onClickToken = this.onClickToken.bind(this);
@@ -35,7 +35,7 @@ export default class App extends React.Component {
       program: this.program,
       ast: this.ast,
       modalVisible: false,
-      selectedNode: null
+      selectedNode: null,
     };
     Expo.FileSystem
       .readDirectoryAsync(Expo.FileSystem.documentDirectory)
@@ -50,7 +50,7 @@ export default class App extends React.Component {
           let ast = util.parse(body);
           this.setState({
             ast: ast,
-            program: body
+            program: body,
           });
         }
       })
@@ -62,7 +62,7 @@ export default class App extends React.Component {
     Expo.FileSystem
       .downloadAsync(
         "http://localhost:7654/App.js",
-        `${Expo.FileSystem.documentDirectory}App.js`
+        `${Expo.FileSystem.documentDirectory}App.js`,
       )
       .then(({ uri }) => {
         console.log(uri);
@@ -96,11 +96,11 @@ export default class App extends React.Component {
             } else {
               return false;
             }
-          }
+          },
         });
       },
       "AST node search",
-      5
+      5,
     );
 
     if (lastMatch.node.type == "Identifier") {
@@ -114,14 +114,14 @@ export default class App extends React.Component {
 
     this.setState({
       modalVisible: true,
-      selectedNode: lastMatch
+      selectedNode: lastMatch,
     });
   }
   rerender() {
     let program = util.printAst(this.state.ast);
     this.setState({
       ast: util.parse(program),
-      program: program
+      program: program,
     });
   }
   onClickToken({ loc, node }) {
@@ -142,7 +142,7 @@ export default class App extends React.Component {
             >
               <Text>{path.node.type}</Text>
             </TouchableHighlight>
-          </View>
+          </View>,
         );
       }
       if (node[key] && Array.isArray(node[key])) {
@@ -170,7 +170,7 @@ export default class App extends React.Component {
                   <Text>Remove</Text>
                 </TouchableHighlight>
               </View>
-            </View>
+            </View>,
           );
         }
       }
@@ -210,7 +210,7 @@ export default class App extends React.Component {
                 <TouchableHighlight
                   onPress={() => {
                     this.setState({
-                      selectedNode: this.state.selectedNode.parentPath
+                      selectedNode: this.state.selectedNode.parentPath,
                     });
                     this.rerender();
                   }}
@@ -235,7 +235,7 @@ export default class App extends React.Component {
       <View
         style={{
           backgroundColor: darcula.hljs.backgroundColor,
-          height: "100%"
+          height: "100%",
         }}
       >
         {this._renderModalBody()}
@@ -255,6 +255,6 @@ export default class App extends React.Component {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "#333"
-  }
+    backgroundColor: "#333",
+  },
 });
