@@ -18,6 +18,17 @@ let variableDeclaration = function({ kind, id, init }) {
     ]);
 };
 
+let addToNode = (node, element) => {
+    if (!node) {
+        node = [];
+    }
+    node.push(element);
+};
+
+let returnStatement = () => {
+    return b.returnStatement(placeholder)
+}
+
 let forInStatement = function({ left, right }) {
     return b.forInStatement(
         b.variableDeclaration("let", [
@@ -54,6 +65,20 @@ let memberExpression = function({ left, right }) {
     );
 };
 
+let classDeclaration = ({ name, superClass }) => {
+    return b.classDeclaration(
+        b.identifier(name),
+        b.classBody([]),
+        superClass ? b.identifier(superClass) : null,
+    );
+};
+
+let addClassMethod = (cl, name) => {
+    return cl.body.body.push(
+        b.classMethod("method", b.identifier(name), [], b.blockStatement([])),
+    );
+};
+
 let identifier = function(name) {
     return b.identifier(name);
 };
@@ -63,12 +88,16 @@ let literal = function(value) {
 };
 
 module.exports = {
-    expressionStatement: expressionStatement,
+    addToNode: addToNode,
+    returnStatement: returnStatement,
+    addClassMethod: addClassMethod,
     binaryExpression: binaryExpression,
+    classDeclaration: classDeclaration,
+    expressionStatement: expressionStatement,
     file: file,
     forInStatement: forInStatement,
     identifier: identifier,
     literal: literal,
-    variableDeclaration: variableDeclaration,
     memberExpression: memberExpression,
+    variableDeclaration: variableDeclaration,
 };
