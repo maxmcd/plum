@@ -16,6 +16,7 @@ import { darcula } from "react-syntax-highlighter-prismjs/dist/styles";
 import util from "./util";
 
 const recast = require("recast");
+const types = require("ast-types");
 
 export default class App extends React.Component {
   constructor(props) {
@@ -130,6 +131,11 @@ export default class App extends React.Component {
   _renderNodeChildrenButtons() {
     let out = [];
     let node = this.state.selectedNode.node;
+    // console.log(types.getFieldNames(node))
+    console.log(types.getFieldNames(node).map((name) => (types.getFieldValue(node, name))))
+    console.log(node)
+    // util.keys(node)
+    console.log(node.type)
     for (let key in node) {
       if (node[key] && node[key].type) {
         let path = this.state.selectedNode.get(key);
@@ -140,13 +146,14 @@ export default class App extends React.Component {
                 this.setState({ selectedNode: path });
               }}
             >
-              <Text>{path.node.type}</Text>
+              <Text>{key} - {path.node.type}</Text>
             </TouchableHighlight>
           </View>,
         );
       }
       if (node[key] && Array.isArray(node[key])) {
         for (let index in node[key]) {
+          console.log(index)
           let path = this.state.selectedNode.get(key).get(index);
           out.push(
             <View>
@@ -175,70 +182,48 @@ export default class App extends React.Component {
         }
       }
     }
-    console.log(out.length);
     return out;
   }
   _renderModalBody() {
     if (!this.state.selectedNode) {
       return;
     }
-
+    let parentPath = this.state.selectedNode.parent
     return (
-      <Modal
-        animationType="none"
-        transparent={true}
-        visible={this.state.modalVisible}
-        onRequestClose={() => {}}
-      >
-        <TouchableOpacity
-          style={{ height: "100%" }}
-          activeOpacity={0}
-          onPressOut={() => {
-            this.setState({ modalVisible: false });
-          }}
-        >
-          <TouchableWithoutFeedback>
-            <View style={{ marginTop: 200, backgroundColor: "#ccc" }}>
-              <TouchableHighlight
-                onPress={() => {
-                  this.setState({ modalVisible: false });
-                }}
-              >
-                <Text>Hide Modal</Text>
-              </TouchableHighlight>
-              <View>
-                <TouchableHighlight
-                  onPress={() => {
-                    this.setState({
-                      selectedNode: this.state.selectedNode.parentPath,
-                    });
-                    this.rerender();
-                  }}
-                >
-                  <Text>
-                    Parent ({this.state.selectedNode.parentPath.node.type})
-                  </Text>
-                </TouchableHighlight>
-              </View>
-              <Text>{this.state.selectedNode.node.type}</Text>
-              <View>
-                {this._renderNodeChildrenButtons()}
-              </View>
-            </View>
-          </TouchableWithoutFeedback>
-        </TouchableOpacity>
-      </Modal>
+      <View style={{backgroundColor: "white"}}>
+        <View>
+          <TouchableHighlight
+            onPress={() => {
+              this.setState({
+                selectedNode: parentPath,
+              });
+              this.rerender();
+            }}
+          >
+            <Text>
+              Parent ({parentPath.node.type})
+            </Text>
+          </TouchableHighlight>
+        </View>
+        <Text>{this.state.selectedNode.node.type}</Text>
+        <View>
+          {this._renderNodeChildrenButtons()}
+        </View>
+      </View>
     );
   }
   render() {
+    if (this.state.selectedNode) {
+      console.log(this.state.selectedNode.name + " - " + this.state.selectedNode.parentPath.name)
+    }
+    
     return (
       <View
         style={{
           backgroundColor: darcula.hljs.backgroundColor,
           height: "100%",
         }}
-      >
-        {this._renderModalBody()}
+      >        
         <View style={{ height: 20 }} />
         <SyntaxHighlighter
           language="javascript"
@@ -248,6 +233,7 @@ export default class App extends React.Component {
         >
           {this.state.program}
         </SyntaxHighlighter>
+        {this._renderModalBody()}
       </View>
     );
   }
