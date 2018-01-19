@@ -2,28 +2,6 @@
 
 It's this: https://www.facebook.com/notes/kent-beck/prune-a-code-editor-that-is-not-a-text-editor/1012061842160013/
 
-**Go Resources:**
+# Current Status
 
- - https://golang.org/pkg/go/ast/
- - https://learnxinyminutes.com/docs/go/
- - https://golang.org/src/cmd/gofmt/gofmt.go
-
-**JS Resources**
-
- - https://learnxinyminutes.com/docs/javascript/
-
-**AST Editors**
-
- - http://www.lamdu.org/
- - https://www.facebook.com/notes/kent-beck/prune-a-code-editor...
- - http://jetbrains.com/mps
- - https://github.com/cxxtree/cxxtree
- - http://www.greenfoot.org/frames/
- - http://unisonweb.org/
- - https://github.com/chrisdone/structured-haskell-mode
- - https://www.emacswiki.org/emacs/ParEdit
- - https://github.com/projectured/projectured
-
-**Value Mutating Interfaces**
-
- - TODO
+A rough text reader is complete. Spin up the react native app in `/app` tap on text to navigate the AST. 

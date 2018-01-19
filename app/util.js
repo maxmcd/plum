@@ -6,7 +6,7 @@ function timeIt(call, name, threshold) {
     let end = Date.now();
     let ms = end - start;
     if (ms > threshold) {
-        console.debug(`${name} took ${ms} ms. Longer than expected.`);
+        console.log(`${name} took ${ms} ms. Longer than expected.`);
     }
     return out;
 }

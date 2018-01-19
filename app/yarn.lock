@@ -299,6 +299,10 @@ ast-types@0.9.14, ast-types@0.x.x:
   version "0.9.14"
   resolved "https://registry.yarnpkg.com/ast-types/-/ast-types-0.9.14.tgz#d34ba5dffb9d15a44351fd2a9d82e4ab2838b5ba"
 
+"ast-types@git+ssh://git@github.com:maxmcd/ast-types.git":
+  version "0.10.1"
+  resolved "git+ssh://git@github.com:maxmcd/ast-types.git#04167951bb304f1a4e9327b22daec5a8b74bc499"
+
 async-each@^1.0.0:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/async-each/-/async-each-1.0.1.tgz#19d386a1d9edc6e7c1c85d388aedbcc56d33602d"

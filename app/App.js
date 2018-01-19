@@ -13,7 +13,9 @@ import {
 } from "react-native";
 import SyntaxHighlighter from "./SyntaxHighlighter";
 import { darcula } from "react-syntax-highlighter-prismjs/dist/styles";
+
 import util from "./util";
+import plum from "./plum";
 
 const recast = require("recast");
 const types = require("ast-types");
@@ -147,12 +149,16 @@ export default class App extends React.Component {
     let out = [];
     let node = this.state.selectedNode.node;
     // console.log(types.getFieldNames(node))
-    console.log(
-      types.getFieldNames(node).map(name => types.getFieldValue(node, name))
-    );
-    console.log(node);
-    // util.keys(node)
-    console.log(node.type);
+    // console.log(
+    //   types.getFieldNames(node).map(name => types.getFieldValue(node, name))
+    // );
+    let n = new plum.Node(node);
+    console.log("---");
+    for (let x in n.fields) {
+      console.log(n.fields[x].name, n.fields[x].options());
+    }
+    console.log("---");
+
     for (let key in node) {
       if (node[key] && node[key].type) {
         let path = this.state.selectedNode.get(key);

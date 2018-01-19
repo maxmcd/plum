@@ -8,17 +8,16 @@ information about valid values and defaults.
 
 */
 
-const util = require("../util")
+const util = require("../util");
 const recast = require("recast");
-const types = require("../../../ast-types/main")
+const types = require("../../../ast-types/main");
 
 let program = `let foo = () => {
     console.log("thing")\n}`;
 
 let ast = util.parse(program);
 
-
-let varDec = ast.program.body[0]
+let varDec = ast.program.body[0];
 
 /*
 from core.js in ast-types
@@ -37,9 +36,9 @@ def("VariableDeclarator")
 
 */
 
-let def = types.getDef(varDec)
+let def = types.getDef(varDec);
 
-def.allFields
+def.allFields;
 /*
 Makes sense
 { loc: Field {},
@@ -49,7 +48,7 @@ Makes sense
   declarations: Field {} }
 */
 
-def.allFields.kind.getValue(varDec)
+def.allFields.kind.getValue(varDec);
 // let
 /*
 Seems there is not way to get the options here: or("var", "let", "const")
@@ -57,7 +56,7 @@ That's important for us
 */
 
 for (let x in def.allFields) {
-    if (def.allFields[x].hidden === false) console.log(x);
+  if (def.allFields[x].hidden === false) console.log(x);
 }
 /*
 type
@@ -76,6 +75,3 @@ false
 true
 
 */
-
-
-
