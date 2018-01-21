@@ -4,7 +4,6 @@ import {
   StyleSheet,
   Text,
   View,
-  AlertIOS,
   ScrollView,
   Modal,
   TouchableOpacity,
@@ -52,52 +51,20 @@ export default class App extends React.Component {
     this.state = {
       program: this.program,
       ast: this.ast,
-      modalVisible: false,
-      selectedNode: null
-    };
-    Expo.FileSystem
-      .readDirectoryAsync(Expo.FileSystem.documentDirectory)
-      .then(files => {
-        console.log(files);
-      });
-
-    Expo.FileSystem
-      .readAsStringAsync(Expo.FileSystem.documentDirectory + "App.js")
-      .then(body => {
-        if (body) {
-          let ast = util.parse(body);
-          this.setState({
-            ast: ast,
-            program: body
-          });
+      selectedNode: this._getNodeForLoc({
+        start: {
+          column: 0,
+          line: 0
+        },
+        end: {
+          column: 0,
+          line: 0
         }
       })
-      .catch(err => {
-        console.log(err);
-      });
-  }
-  _downloadApp() {
-    Expo.FileSystem
-      .downloadAsync(
-        "http://localhost:7654/App.js",
-        `${Expo.FileSystem.documentDirectory}App.js`
-      )
-      .then(({ uri }) => {
-        console.log(uri);
-        return uri;
-      });
-  }
-  renderText(err, data) {
-    if (err) {
-      return console.log(err);
-    }
-    this.setState({ code: data });
+    };
   }
   getTextAtLocation(location) {
     this.state.text[location];
-  }
-  displayType(type) {
-    AlertIOS.alert(type);
   }
   _getNodeForLoc(loc) {
     let lastMatch;
@@ -120,20 +87,7 @@ export default class App extends React.Component {
       "AST node search",
       5
     );
-
-    if (lastMatch.node.type == "Identifier") {
-      // lastMatch.name = "whatever_very_long_very_long"
-      lastMatch.node;
-      console.log(lastMatch.parentPath.node.type);
-      // console.log(lastMatch.parentPath.node.object.name)
-      // console.log(lastMatch.parentPath.node.property.name)
-      this.rerender();
-    }
-
-    this.setState({
-      modalVisible: true,
-      selectedNode: lastMatch
-    });
+    return lastMatch;
   }
   rerender() {
     let program = util.printAst(this.state.ast);
@@ -143,7 +97,9 @@ export default class App extends React.Component {
     });
   }
   onClickToken({ loc, node }) {
-    this._getNodeForLoc(loc);
+    this.setState({
+      selectedNode: this._getNodeForLoc(loc)
+    });
   }
   _renderNodeChildrenButtons() {
     let out = [];
@@ -174,25 +130,6 @@ export default class App extends React.Component {
           </View>
         );
       }
-      if (node[key] && Array.isArray(node[key])) {
-        for (let index in node[key]) {
-          console.log(index);
-          let path = this.state.selectedNode.get(key).get(index);
-          out.push(
-            <View key={key}>
-              <View style={{ flexDirection: "row" }}>
-                <Link
-                  onPress={() => {
-                    this.setState({ selectedNode: path });
-                  }}
-                >
-                  {key}: {path.node.type}
-                </Link>
-              </View>
-            </View>
-          );
-        }
-      }
     }
     if (out.length > 0) {
       out.unshift(
@@ -204,9 +141,6 @@ export default class App extends React.Component {
     return out;
   }
   _renderModalBody() {
-    if (!this.state.selectedNode) {
-      return;
-    }
     let parentPath = this.state.selectedNode.parent;
     return (
       <View style={{ backgroundColor: "white" }}>

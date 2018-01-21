@@ -8,9 +8,7 @@ information about valid values and defaults.
 
 */
 
-const util = require("../util");
-const recast = require("recast");
-const types = require("../../../ast-types/main");
+const types = require("ast-types");
 
 let program = `let foo = () => {
     console.log("thing")\n}`;
