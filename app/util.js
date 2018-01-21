@@ -91,5 +91,5 @@ module.exports = {
             out.push(right);
         }
         return out;
-    }
+    },
 };

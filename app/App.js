@@ -8,7 +8,7 @@ import {
   Modal,
   TouchableOpacity,
   TouchableHighlight,
-  TouchableWithoutFeedback
+  TouchableWithoutFeedback,
 } from "react-native";
 import SyntaxHighlighter from "./SyntaxHighlighter";
 import { darcula } from "react-syntax-highlighter-prismjs/dist/styles";
@@ -39,39 +39,38 @@ export default class App extends React.Component {
     super(props);
 
     this._getNodeForLoc = this._getNodeForLoc.bind(this);
-    this._renderNodeChildrenButtons = this._renderNodeChildrenButtons.bind(
-      this
-    );
+    this._renderParent = this._renderParent.bind(this);
+    this._renderNodeButtons = this._renderNodeButtons.bind(this);
     this._renderModalBody = this._renderModalBody.bind(this);
     this.onClickToken = this.onClickToken.bind(this);
 
     this.program = `let foo = () => {
     console.log("thing")\n}`;
     this.ast = util.parse(this.program);
+    let selectedNode;
+    recast.visit(this.ast, {
+      visitNode: function(path) {
+        selectedNode = path;
+        return false;
+      },
+    });
     this.state = {
       program: this.program,
       ast: this.ast,
-      selectedNode: this._getNodeForLoc({
-        start: {
-          column: 0,
-          line: 0
-        },
-        end: {
-          column: 0,
-          line: 0
-        }
-      })
+      selectedNode: selectedNode,
     };
   }
   getTextAtLocation(location) {
     this.state.text[location];
   }
-  _getNodeForLoc(loc) {
+  _getNodeForLoc(loc, ast) {
     let lastMatch;
-
+    if (!ast) {
+      ast = this.state.ast;
+    }
     util.timeIt(
       () => {
-        recast.visit(this.state.ast, {
+        recast.visit(ast, {
           visitNode: function(path) {
             if (!path.node.loc) {
               this.traverse(path);
@@ -81,7 +80,7 @@ export default class App extends React.Component {
             } else {
               return false;
             }
-          }
+          },
         });
       },
       "AST node search",
@@ -93,15 +92,15 @@ export default class App extends React.Component {
     let program = util.printAst(this.state.ast);
     this.setState({
       ast: util.parse(program),
-      program: program
+      program: program,
     });
   }
   onClickToken({ loc, node }) {
     this.setState({
-      selectedNode: this._getNodeForLoc(loc)
+      selectedNode: this._getNodeForLoc(loc),
     });
   }
-  _renderNodeChildrenButtons() {
+  _renderNodeButtons() {
     let out = [];
     let node = this.state.selectedNode.node;
     // console.log(types.getFieldNames(node))
@@ -140,16 +139,15 @@ export default class App extends React.Component {
     }
     return out;
   }
-  _renderModalBody() {
-    let parentPath = this.state.selectedNode.parent;
-    return (
-      <View style={{ backgroundColor: "white" }}>
+  _renderParent(parentPath) {
+    if (parentPath) {
+      return (
         <View style={{ flexDirection: "row" }}>
           <Text style={{ fontWeight: "bold" }}>Parent:</Text>
           <Link
             onPress={() => {
               this.setState({
-                selectedNode: parentPath
+                selectedNode: parentPath,
               });
               this.rerender();
             }}
@@ -157,30 +155,30 @@ export default class App extends React.Component {
             ({parentPath.node.type})
           </Link>
         </View>
+      );
+    }
+  }
+  _renderModalBody() {
+    let parentPath = this.state.selectedNode.parent;
+    return (
+      <View style={{ backgroundColor: "white" }}>
+        {this._renderParent(parentPath)}
         <View style={{ flexDirection: "row" }}>
           <Text style={{ fontWeight: "bold" }}>Current Node: </Text>
           <Text>{this.state.selectedNode.node.type}</Text>
         </View>
         <View>
-          {this._renderNodeChildrenButtons()}
+          {this._renderNodeButtons()}
         </View>
       </View>
     );
   }
   render() {
-    if (this.state.selectedNode) {
-      console.log(
-        this.state.selectedNode.name +
-          " - " +
-          this.state.selectedNode.parentPath.name
-      );
-    }
-
     return (
       <View
         style={{
           backgroundColor: darcula.hljs.backgroundColor,
-          height: "100%"
+          height: "100%",
         }}
       >
         <View style={{ height: 20 }} />
@@ -200,6 +198,6 @@ export default class App extends React.Component {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "#333"
-  }
+    backgroundColor: "#333",
+  },
 });

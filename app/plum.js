@@ -27,5 +27,5 @@ class Field {
 }
 
 module.exports = {
-  Node: Node
+  Node: Node,
 };
