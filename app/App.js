@@ -110,7 +110,11 @@ export default class App extends React.Component {
     let n = new plum.Node(node);
     console.log("---");
     for (let x in n.fields) {
-      console.log(n.fields[x].name, n.fields[x].options());
+      console.log(
+        n.fields[x].name,
+        n.fields[x].options(),
+        n.fields[x].displayValue()
+      );
     }
     console.log("---");
 

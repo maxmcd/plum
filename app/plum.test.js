@@ -12,5 +12,13 @@ it("can get basic node info", () => {
   let varDec = ast.program.body[0];
 
   let node = new plum.Node(varDec);
-  console.log(node.fields);
+  // console.log(node.fields);
+
+  for (let x in node.fields) {
+    console.log(
+      node.fields[x].name,
+      node.fields[x].options(),
+      node.fields[x].displayValue()
+    );
+  }
 });
